@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/about.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="about-page">
+    <!-- Beginning Section -->
+    <section class="about-section beginning">
+        <div class="container">
+            <div class="section-content">
+                <div class="left-col">
+                    <p class="section-tag">APEXSTEEL / ABOUT</p>
+                    <h1 class="reveal-text">OUR BEGINNING</h1>
+                    <h1 class="reveal-text">CRAFT AND CARE</h1>
+                    <h1 class="reveal-text">COMMUNITY FIRST</h1>
+                </div>
+                <div class="right-col">
+                    <div class="values-list">
+                        <h2 class="reveal-text-right">QUALITY</h2>
+                        <h2 class="reveal-text-right">RESPONSIBILITY</h2>
+                        <h2 class="reveal-text-right">TRUST</h2>
+                    </div>
+                    <p class="section-subtext">We honor materials and people behind them</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Vision Section -->
+    <section class="about-section vision">
+        <div class="container">
+            <div class="section-content">
+                <div class="left-col">
+                    <p class="section-tag">APEXSTEEL / VISION</p>
+                    <h1 class="reveal-text">DESIGN</h1>
+                    <h1 class="reveal-text">TECHNOLOGY</h1>
+                    <h1 class="reveal-text">TOGETHER</h1>
+                </div>
+                <div class="right-col">
+                    <p class="vision-description">
+                        We blend physical craft with digital motion to create meaningful, playful experiences. 
+                        We value collaboration, openness, and steady progress that invites everyone to be part of the story.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Team Section -->
+    <section class="about-section team">
+        <div class="container">
+            <div class="section-content full-width">
+                <p class="section-tag center">APEXSTEEL / TEAM</p>
+                <div class="team-heading">
+                    <h1 class="reveal-text-center">OUR TEAM</h1>
+                    <h1 class="reveal-text-center">CRAFTS THE</h1>
+                    <h1 class="reveal-text-center">EXPERIENCE</h1>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const revealElements = document.querySelectorAll('.reveal-text, .reveal-text-right, .reveal-text-center, .vision-description, .section-subtext');
+        
+        const observerOptions = {
+            threshold: 0.1
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                }
+            });
+        }, observerOptions);
+
+        revealElements.forEach(el => observer.observe(el));
+    });
+</script>
+{% endblock %}

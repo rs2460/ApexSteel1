@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/checkout.css' %}">
+{% endblock %}
+
+{% block extra_js %}
+{% endblock %}
+
+{% block content %}
+<section class="checkout-section">
+    <div class="container">
+        <h1 class="checkout-title">Checkout</h1>
+        
+        <div class="checkout-layout">
+            <div class="checkout-form">
+                <h2>Shipping Address</h2>
+                <form id="shipping-form" method="post">
+                    {% csrf_token %}
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="first_name">First Name</label>
+                            <input type="text" id="first_name" name="first_name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="last_name">Last Name</label>
+                            <input type="text" id="last_name" name="last_name" required>
+                        </div>
+                        <div class="form-group full-width">
+                            <label for="email">Email</label>
+                            <input type="email" id="email" name="email" value="{{ user.email }}" required>
+                        </div>
+                        <div class="form-group full-width">
+                            <label for="address">Address</label>
+                            <textarea id="address" name="address" rows="3" required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="city">City</label>
+                            <input type="text" id="city" name="city" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="zip">ZIP Code</label>
+                            <input type="text" id="zip" name="zip" required>
+                        </div>
+                    </div>
+
+                    <h2 class="payment-title">Payment Method</h2>
+                    <div class="payment-options">
+                        <label class="payment-option">
+                            <input type="radio" name="payment" value="razorpay" checked>
+                            <span class="radio-label">Secure Online Payment (UPI, Cards, NetBanking, Wallets)</span>
+                        </label>
+                        
+                        <label class="payment-option">
+                            <input type="radio" name="payment" value="cod">
+                            <span class="radio-label">Cash on Delivery</span>
+                        </label>
+                    </div>
+
+                    <button type="submit" class="btn-place-order">Proceed to Payment</button>
+                </form>
+            </div>
+
+            <div class="order-summary">
+                <h2>Order Summary</h2>
+                <div class="summary-items">
+                    {% for item in cart_items %}
+                    <div class="summary-item">
+                        <img src="{{ item.product.image_url }}" alt="{{ item.product.name }}">
+                        <div class="item-info">
+                            <h3>{{ item.product.name }}</h3>
+                            <p>Qty: {{ item.quantity }}</p>
+                            <p class="price">₹{{ item.product.price }}</p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="summary-total">
+                    <div class="row">
+                        <span>Subtotal</span>
+                        <span>₹{{ subtotal }}</span>
+                    </div>
+                    <div class="row">
+                        <span>Shipping</span>
+                        <span>₹0</span>
+                    </div>
+                    <div class="row total">
+                        <span>Total</span>
+                        <span>₹{{ total }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

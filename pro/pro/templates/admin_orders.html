@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/admin.css' %}">
+<style>
+    .admin-orders-page { padding: 100px 50px 50px; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="admin-orders-page">
+    <h1>All Orders</h1>
+    <table class="product-table">
+        <thead>
+            <tr>
+                <th>Order ID</th>
+                <th>User</th>
+                <th>Date</th>
+                <th>Total</th>
+                <th>Payment</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in orders %}
+            <tr>
+                <td>{{ order.id }}</td>
+                <td>{{ order.user.username }}</td>
+                <td>{{ order.created_at|date:"d M Y" }}</td>
+                <td>₹{{ order.total_amount }}</td>
+                <td>
+                    {% if order.is_paid %}
+                        <span class="badge badge-success" style="background: #d4edda; color: #155724; padding: 5px 10px; border-radius: 4px; font-size: 12px;">Paid</span>
+                    {% else %}
+                        <span class="badge badge-danger" style="background: #f8d7da; color: #721c24; padding: 5px 10px; border-radius: 4px; font-size: 12px;">Unpaid</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <form action="{% url 'update_order_status' order.id %}" method="POST">
+                        {% csrf_token %}
+                        <select name="status" onchange="this.form.submit()">
+                            {% for status_val, status_display in order.STATUS_CHOICES %}
+                            <option value="{{ status_val }}" {% if order.status == status_val %}selected{% endif %}>{{ status_display }}</option>
+                            {% endfor %}
+                        </select>
+                    </form>
+                </td>
+                <td><a href="#" class="btn btn-secondary">Details</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

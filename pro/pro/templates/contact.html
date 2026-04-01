@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/contact.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="contact-page">
+    <!-- Contact Info Section -->
+    <section class="contact-section info">
+        <div class="container">
+            <div class="section-content">
+                <div class="left-col">
+                    <p class="section-tag">APEXSTEEL / CONTACT</p>
+                    <h1 class="reveal-text">ADDRESS</h1>
+                    <h1 class="reveal-text">PHONE</h1>
+                    <h1 class="reveal-text">EMAIL</h1>
+                    
+                    <div class="details-list">
+                        <p class="reveal-detail">Address: Vasai Road, Mumbai - 401202</p>
+                        <p class="reveal-detail">Phone: +91 8208314827</p>
+                        <p class="reveal-detail">Email: apexsteel1234@gmail.com</p>
+                    </div>
+                </div>
+                <div class="right-col">
+                    <div class="heading-list">
+                        <h2 class="reveal-text-right">LET'S TALK</h2>
+                        <h2 class="reveal-text-right">SAY HELLO</h2>
+                        <h2 class="reveal-text-right">STAY CONNECTED</h2>
+                    </div>
+                    <p class="section-subtext">We respond promptly and value every message</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Connect Section -->
+    <section class="contact-section connect">
+        <div class="container">
+            <div class="section-content vertical">
+                <p class="section-tag">APEXSTEEL / CONNECT</p>
+                <div class="connect-heading">
+                    <h1 class="reveal-text-center">MESSAGE US</h1>
+                    <h1 class="reveal-text-center">FOLLOW US</h1>
+                    <h1 class="reveal-text-center">STAY UPDATED</h1>
+                </div>
+                
+                <div class="social-icons-grid">
+                    <a href="https://wa.me/qr/6TG7DSLFCHWLP1" target="_blank" class="social-icon-btn whatsapp">
+                        <i class="fab fa-whatsapp"></i>
+                    </a>
+                    <a href="https://www.instagram.com/rupesh______06?igsh=ZGZlZTFjdnlxYms=" target="_blank" class="social-icon-btn instagram">
+                        <i class="fab fa-instagram"></i>
+                    </a>
+                    <a href="https://www.facebook.com/share/1EB1yb7m8u/" target="_blank" class="social-icon-btn facebook">
+                        <i class="fab fa-facebook-f"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const revealElements = document.querySelectorAll('.reveal-text, .reveal-text-right, .reveal-text-center, .reveal-detail, .section-subtext, .social-icon-btn');
+        
+        const observerOptions = {
+            threshold: 0.1
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                }
+            });
+        }, observerOptions);
+
+        revealElements.forEach(el => observer.observe(el));
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,153 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/auth.css' %}?v=1.1">
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Auto-hide messages after 5 seconds
+        const messages = document.querySelectorAll('.auth-message');
+        messages.forEach(function(message) {
+            setTimeout(function() {
+                message.style.opacity = '0';
+                message.style.transform = 'translateY(-20px)';
+                setTimeout(function() {
+                    message.remove();
+                }, 500);
+            }, 5000);
+        });
+
+        // Robust Real-time Password Validation for Tooltip
+        const passwordInputs = document.querySelectorAll('input[type="password"]');
+        const commonPasswords = ['password', '12345678', 'qwertyuiop', 'admin123'];
+
+        passwordInputs.forEach(input => {
+            // Find the tooltip associated with this input
+            const container = input.closest('.form-group');
+            const tooltip = container ? container.querySelector('.password-tooltip') : null;
+            
+            if (!tooltip) return;
+
+            const tooltipItems = Array.from(tooltip.querySelectorAll('li'));
+            if (tooltipItems.length === 0) return;
+
+            // Helper to find which item is which rule by text content
+            const ruleIndices = {
+                length: tooltipItems.findIndex(li => li.innerText.includes('8 characters')),
+                common: tooltipItems.findIndex(li => li.innerText.includes('commonly used')),
+                numeric: tooltipItems.findIndex(li => li.innerText.includes('entirely numeric')),
+                similarity: tooltipItems.findIndex(li => li.innerText.includes('similar to'))
+            };
+
+            const validate = () => {
+                const val = input.value;
+                
+                if (val.length === 0) {
+                    tooltip.classList.remove('active');
+                    return;
+                }
+
+                const rules = {
+                    length: val.length >= 8,
+                    notCommon: !commonPasswords.includes(val.toLowerCase()),
+                    notNumeric: !/^\d+$/.test(val),
+                    similarity: true // Hard to check client-side
+                };
+
+                const updateItem = (ruleKey, satisfied) => {
+                    const index = ruleIndices[ruleKey];
+                    if (index === -1) return;
+                    
+                    if (satisfied) {
+                        tooltipItems[index].classList.add('satisfied');
+                        tooltipItems[index].classList.remove('unsatisfied');
+                    } else {
+                        tooltipItems[index].classList.remove('satisfied');
+                        tooltipItems[index].classList.add('unsatisfied');
+                    }
+                };
+
+                updateItem('length', rules.length);
+                updateItem('common', rules.notCommon);
+                updateItem('numeric', rules.notNumeric);
+                updateItem('similarity', val.length > 0);
+
+                // Show tooltip if any checkable rule fails
+                if (!rules.length || !rules.notCommon || !rules.notNumeric) {
+                    tooltip.classList.add('active');
+                } else {
+                    tooltip.classList.remove('active');
+                }
+            };
+
+            input.addEventListener('input', validate);
+            
+            input.addEventListener('focus', () => {
+                if (input.value.length === 0) {
+                    tooltip.classList.add('active');
+                    tooltipItems.forEach(li => {
+                        li.classList.remove('satisfied');
+                        li.classList.remove('unsatisfied');
+                    });
+                } else {
+                    validate();
+                }
+            });
+
+            input.addEventListener('blur', () => {
+                tooltip.classList.remove('active');
+            });
+        });
+    });
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card">
+        <h1 class="auth-title">Create Account</h1>
+        
+        {% if messages %}
+            {% for message in messages %}
+                {% if 'auth' in message.tags %}
+                    <div class="alert alert-{{ message.tags }} auth-message">
+                        {{ message }}
+                    </div>
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+        
+        <form method="post" action="{% url 'register' %}">
+            {% csrf_token %}
+            {% for field in form %}
+                <div class="form-group {% if 'password' in field.name %}password-wrapper{% endif %}">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.help_text %}
+                        {% if 'password' in field.name %}
+                            <div class="password-tooltip" id="password-tooltip">
+                                <div class="tooltip-header">Password Requirements</div>
+                                {{ field.help_text|safe }}
+                            </div>
+                        {% else %}
+                            <small class="form-help">{{ field.help_text|safe }}</small>
+                        {% endif %}
+                    {% endif %}
+                    {% if 'password' not in field.name %}
+                        {% for error in field.errors %}
+                            <div class="field-error">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            {% endfor %}
+            <button type="submit" class="auth-button">Register</button>
+        </form>
+        <div class="auth-links">
+            <a href="{% url 'login' %}">Already have an account? Login</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

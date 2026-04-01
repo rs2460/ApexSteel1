@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/products.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="products-hero">
+    <h1>Our Collection</h1>
+    <p>Discover our premium selection of steel and stone jewellery.</p>
+</section>
+
+<section class="product-page-grid">
+    <div class="container">
+        <div class="products-grid">
+            {% for product in products %}
+            <div class="product-card" data-id="{{ product.id }}">
+                <div class="product-image-container">
+                    <img src="{{ product.image_url }}" alt="{{ product.name }}" class="product-image">
+                    <div class="category-tag">{{ product.category }}</div>
+                    <button class="wishlist-btn" data-id="{{ product.id }}">
+                        {% if product.id in wishlisted_product_ids %}
+                            <i class="fas fa-heart"></i>
+                        {% else %}
+                            <i class="far fa-heart"></i>
+                        {% endif %}
+                    </button>
+                </div>
+                <div class="product-info">
+                    <a href="{% url 'product_detail' product.id %}" class="product-name-link"><h3 class="product-name">{{ product.name }}</h3></a>
+                    <p class="product-meta">{{ product.category }} • {{ product.gender }}</p>
+                    <p class="product-price">₹{{ product.price }}</p>
+                    <div class="product-actions">
+                        <button class="btn-buy" 
+                                data-id="{{ product.id }}"
+                                data-name="{{ product.name }}"
+                                data-price="{{ product.price }}"
+                                data-image="{{ product.image_url }}"
+                                data-category="{{ product.category }}"
+                                data-description="{{ product.description }}">
+                            Buy Now
+                        </button>
+                        <button class="btn-cart" data-id="{{ product.id }}">Add to Cart</button>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <p>No products found.</p>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Product Details Modal -->
+<div id="product-modal" class="modal">
+    <div class="modal-content">
+        <span class="close-modal">&times;</span>
+        <div class="modal-body">
+            <div class="modal-image-area">
+                <img id="modal-image" src="" alt="Product Image">
+                <div id="modal-category-watermark" class="category-watermark"></div>
+            </div>
+            <div class="modal-info-area">
+                <h2 id="modal-name"></h2>
+                <p id="modal-price" class="modal-price"></p>
+                <p id="modal-description" class="modal-description"></p>
+                <div class="modal-actions">
+                    <button id="modal-checkout-btn" class="btn-checkout">Checkout Now</button>
+                    <button id="modal-cart-btn" class="btn-modal-cart">Add to Cart</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Modal Logic
+        const modal = document.getElementById('product-modal');
+        const closeModal = document.querySelector('.close-modal');
+        const buyButtons = document.querySelectorAll('.btn-buy');
+
+        buyButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const data = btn.dataset;
+                document.getElementById('modal-image').src = data.image;
+                document.getElementById('modal-name').innerText = data.name;
+                document.getElementById('modal-price').innerText = '₹' + data.price;
+                document.getElementById('modal-description').innerText = data.description || 'No description available.';
+                document.getElementById('modal-category-watermark').innerText = data.category;
+                document.getElementById('modal-cart-btn').dataset.id = data.id;
+                document.getElementById('modal-checkout-btn').dataset.id = data.id;
+                modal.style.display = 'block';
+                document.body.style.overflow = 'hidden';
+            });
+        });
+
+        closeModal.onclick = () => {
+            modal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        };
+
+        window.onclick = (event) => {
+            if (event.target == modal) {
+                modal.style.display = 'none';
+                document.body.style.overflow = 'auto';
+            }
+        };
+
+        // Modal actions
+        document.getElementById('modal-cart-btn').addEventListener('click', function() {
+            window.addToCart(this.dataset.id);
+        });
+
+        document.getElementById('modal-checkout-btn').addEventListener('click', function() {
+            window.location.href = `{% url 'checkout' %}?product_id=${this.dataset.id}`;
+        });
+
+        // Grid actions
+        document.querySelectorAll('.wishlist-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                window.toggleWishlist(btn.dataset.id, btn);
+            });
+        });
+
+        document.querySelectorAll('.btn-cart').forEach(btn => {
+            btn.addEventListener('click', () => {
+                window.addToCart(btn.dataset.id);
+            });
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,141 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div style="padding: 150px 20px; text-align: center;">
+    <h2>Initializing Payment...</h2>
+    <p>Please wait while we securely process your payment.</p>
+    <p>Do not refresh the page or close the window.</p>
+    <div class="loader"></div>
+    <p id="payment-instructions" style="margin-top: 20px; font-size: 14px; color: #666;">
+        If the payment window doesn't open within 10 seconds, click the manual button below.
+    </p>
+    <button id="manual-open-btn" style="display: none; padding: 10px 20px; margin-top: 16px; font-size: 14px;">Open Payment Window</button>
+</div>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<form id="paymentForm" action="{% url 'verify_payment' %}" method="POST" style="display: none;">
+    {% csrf_token %}
+    <input type="hidden" id="razorpay_payment_id" name="razorpay_payment_id">
+    <input type="hidden" id="razorpay_order_id" name="razorpay_order_id">
+    <input type="hidden" id="razorpay_signature" name="razorpay_signature">
+</form>
+
+<script>
+    console.log('Payment processing page loaded');
+    console.log('Razorpay key:', '{{ razorpay_merchant_key }}');
+    console.log('Order ID:', '{{ razorpay_order_id }}');
+    console.log('Amount:', {{ razorpay_amount|default:0 }});
+    
+    var paymentInitialized = false;
+    
+    // Fallback timeout - redirect if payment doesn't initialize within 10 seconds
+    setTimeout(function() {
+        if (!paymentInitialized) {
+            console.error('Payment initialization timeout');
+            document.querySelector('h2').textContent = 'Payment initialization timeout';
+            document.querySelector('p').textContent = 'Redirecting to checkout...';
+            setTimeout(function() {
+                window.location.href = "{% url 'checkout' %}";
+            }, 2000);
+        }
+    }, 10000);
+    
+    // Check if Razorpay is loaded
+    if (typeof Razorpay === 'undefined') {
+        console.error('Razorpay SDK not loaded');
+        document.querySelector('h2').textContent = 'Payment system not available';
+        document.querySelector('p').textContent = 'Please refresh the page and try again.';
+        return;
+    }
+    
+    var options = {
+        "key": "{{ razorpay_merchant_key }}",
+        "amount": {{ razorpay_amount|default:0 }},
+        "currency": "{{ currency }}",
+        "name": "APEXSTEEL",
+        "description": "Order #{{ order.id }}",
+        "order_id": "{{ razorpay_order_id }}",
+        "prefill": {
+            "name": "{{ user_name }}",
+            "email": "{{ user_email }}"
+        },
+        "theme": {
+            "color": "#1a1a1a"
+        },
+        "config": {
+            "display": {
+                "language": "en",
+                "hide": [
+                    {
+                        "method": "paylater"
+                    }
+                ],
+                "preferences": {
+                    "show_default_blocks": true
+                }
+            }
+        },
+        "method": {
+            "netbanking": true,
+            "card": true,
+            "upi": true,
+            "wallet": true
+        },
+        "handler": function (response) {
+            console.log('Payment successful:', response);
+            paymentInitialized = true;
+            // Payment successful - submit the verification form
+            document.getElementById('razorpay_payment_id').value = response.razoray_payment_id;
+            document.getElementById('razorpay_order_id').value = response.razorpay_order_id;
+            document.getElementById('razorpay_signature').value = response.razorpay_signature;
+            
+            // Show processing message
+            document.querySelector('h2').textContent = 'Verifying Payment...';
+            
+            document.getElementById('paymentForm').submit();
+        },
+        "redirect": true,
+        "retry": {
+            "enabled": true,
+            "max_count": 3
+        },
+        "timeout": 300,
+        "remember_customer": false,
+        "readonly": {
+            "email": true,
+            "name": true
+        }
+    };
+    
+    console.log('Razorpay options:', options);
+    
+    
+    var rzp1 = new Razorpay(options);
+
+    // Handle payment errors
+    rzp1.on('payment.failed', function(response) {
+        console.error('Payment failed:', response);
+        paymentInitialized = true;
+        window.location.href = "{% url 'payment_failed' %}?order_id={{ razorpay_order_id }}&error=" + encodeURIComponent(response.error.description);
+    });
+
+    rzp1.open();
+</script>
+
+<style>
+    .loader {
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #1a1a1a;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin: 20px auto;
+    }
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+</style>
+{% endblock %}

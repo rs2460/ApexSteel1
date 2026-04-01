@@ -1,0 +1,176 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/products.css' %}">
+    <style>
+        .wishlist-hero {
+            padding: 120px 50px 60px;
+            text-align: center;
+            background-color: #f4f4f4;
+        }
+        .wishlist-hero h1 {
+            font-family: var(--serif-font);
+            font-size: 48px;
+            margin-bottom: 15px;
+            letter-spacing: 2px;
+        }
+        .empty-wishlist {
+            text-align: center;
+            padding: 100px 50px;
+        }
+        .empty-wishlist i {
+            font-size: 64px;
+            color: #ddd;
+            margin-bottom: 20px;
+        }
+        .btn-shop {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 12px 30px;
+            background-color: #000;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+        .btn-shop:hover {
+            background-color: #333;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<section class="wishlist-hero">
+    <h1>Your Wishlist</h1>
+    <p>Items you've saved for later.</p>
+</section>
+
+<section class="product-page-grid">
+    <div class="container">
+        {% if wishlist_items %}
+        <div class="products-grid">
+            {% for item in wishlist_items %}
+            <div class="product-card" data-id="{{ item.product.id }}">
+                <div class="product-image-container">
+                    <img src="{{ item.product.image_url }}" alt="{{ item.product.name }}" class="product-image">
+                    <div class="category-tag">{{ item.product.category }}</div>
+                    <button class="wishlist-btn active" data-id="{{ item.product.id }}">
+                        <i class="fas fa-heart"></i>
+                    </button>
+                </div>
+                <div class="product-info">
+                    <h3 class="product-name">{{ item.product.name }}</h3>
+                    <p class="product-meta">{{ item.product.category }} • {{ item.product.gender }}</p>
+                    <p class="product-price">₹{{ item.product.price }}</p>
+                    <div class="product-actions">
+                        <button class="btn-buy" 
+                                data-id="{{ item.product.id }}"
+                                data-name="{{ item.product.name }}"
+                                data-price="{{ item.product.price }}"
+                                data-image="{{ item.product.image_url }}"
+                                data-category="{{ item.product.category }}"
+                                data-description="{{ item.product.description }}">
+                            Buy Now
+                        </button>
+                        <button class="btn-cart" data-id="{{ item.product.id }}">Add to Cart</button>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-wishlist">
+            <i class="far fa-heart"></i>
+            <h2>Your wishlist is empty</h2>
+            <p>Explore our products and save your favorites!</p>
+            <a href="{% url 'product_list' %}" class="btn-shop">Start Shopping</a>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Re-use the modal from products page -->
+<div id="product-modal" class="modal">
+    <div class="modal-content">
+        <span class="close-modal">&times;</span>
+        <div class="modal-body">
+            <div class="modal-image-area">
+                <img id="modal-image" src="" alt="Product Image">
+                <div id="modal-category-watermark" class="category-watermark"></div>
+            </div>
+            <div class="modal-info-area">
+                <h2 id="modal-name"></h2>
+                <p id="modal-price" class="modal-price"></p>
+                <p id="modal-description" class="modal-description"></p>
+                <div class="modal-actions">
+                    <button id="modal-checkout-btn" class="btn-checkout">Checkout Now</button>
+                    <button id="modal-cart-btn" class="btn-modal-cart">Add to Cart</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Modal Logic
+        const modal = document.getElementById('product-modal');
+        const closeModal = document.querySelector('.close-modal');
+        const buyButtons = document.querySelectorAll('.btn-buy');
+
+        buyButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const data = btn.dataset;
+                document.getElementById('modal-image').src = data.image;
+                document.getElementById('modal-name').innerText = data.name;
+                document.getElementById('modal-price').innerText = '₹' + data.price;
+                document.getElementById('modal-description').innerText = data.description || 'No description available.';
+                document.getElementById('modal-category-watermark').innerText = data.category;
+                document.getElementById('modal-cart-btn').dataset.id = data.id;
+                document.getElementById('modal-checkout-btn').dataset.id = data.id;
+                modal.style.display = 'block';
+            });
+        });
+
+        closeModal.onclick = () => modal.style.display = 'none';
+        window.onclick = (e) => { if (e.target == modal) modal.style.display = 'none'; };
+
+        // Wishlist Toggle (Removes from view on wishlist page)
+        document.querySelectorAll('.wishlist-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const productId = btn.dataset.id;
+                window.toggleWishlist(productId, btn);
+                const card = btn.closest('.product-card');
+                card.style.opacity = '0';
+                card.style.transform = 'scale(0.8)';
+                setTimeout(() => {
+                    card.remove();
+                    if (document.querySelectorAll('.product-card').length === 0) {
+                        location.reload();
+                    }
+                }, 400);
+            });
+        });
+
+        // Add to Cart
+        document.querySelectorAll('.btn-cart').forEach(btn => {
+            btn.addEventListener('click', () => window.addToCart(btn.dataset.id));
+        });
+
+        document.getElementById('modal-cart-btn').addEventListener('click', function() {
+            window.addToCart(this.dataset.id);
+        });
+
+        document.getElementById('modal-checkout-btn').addEventListener('click', function() {
+            window.addToCart(this.dataset.id);
+            setTimeout(() => {
+                window.location.href = "{% url 'checkout' %}";
+            }, 300);
+        });
+    });
+</script>
+{% endblock %}

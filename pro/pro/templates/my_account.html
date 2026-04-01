@@ -1,0 +1,164 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+    .account-page { 
+        padding: 150px 50px 50px; 
+        max-width: 1200px; 
+        margin: 0 auto;
+        animation: account-fade-in 0.8s ease-out;
+    }
+
+    @keyframes account-fade-in {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .account-header {
+        margin-bottom: 40px;
+        border-bottom: 2px solid #eee;
+        padding-bottom: 20px;
+    }
+
+    .account-header h1 {
+        font-family: var(--serif-font);
+        font-size: 36px;
+        margin-bottom: 10px;
+    }
+
+    .order-history-table { 
+        width: 100%; 
+        border-collapse: separate; 
+        border-spacing: 0 15px;
+        margin-top: 20px; 
+    }
+
+    .order-history-table th { 
+        padding: 15px; 
+        text-align: left;
+        color: var(--gray-text);
+        font-size: 14px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .order-history-table tr {
+        background: #fff;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        border-radius: 12px;
+        transition: all 0.3s ease;
+    }
+
+    .order-history-table tr:hover {
+        transform: scale(1.01) translateY(-3px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    }
+
+    .order-history-table td { 
+        padding: 20px 15px; 
+        border: none;
+        vertical-align: middle;
+    }
+
+    .order-history-table td:first-child {
+        border-radius: 12px 0 0 12px;
+        font-weight: 700;
+        color: var(--primary-color);
+    }
+
+    .order-history-table td:last-child {
+        border-radius: 0 12px 12px 0;
+    }
+
+    .status-badge {
+        padding: 6px 15px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+
+    .status-pending { background: #fff3cd; color: #856404; }
+    .status-shipped { background: #d1ecf1; color: #0c5460; }
+    .status-delivered { background: #d4edda; color: #155724; }
+    .status-cancelled { background: #f8d7da; color: #721c24; }
+
+    .track-order-link {
+        color: var(--primary-color);
+        text-decoration: none;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.3s ease;
+    }
+
+    .track-order-link:hover {
+        color: #e74c3c;
+        transform: translateX(5px);
+    }
+
+    .order-items-list {
+        list-style: none;
+        font-size: 13px;
+        color: var(--gray-text);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="account-page">
+    <div class="account-header">
+        <h1>My Account</h1>
+        <p>Welcome back, {{ user.username }}! View and track your orders below.</p>
+    </div>
+
+    <h2>Order History & Tracking</h2>
+    <table class="order-history-table">
+        <thead>
+            <tr>
+                <th>Order ID</th>
+                <th>Date</th>
+                <th>Items</th>
+                <th>Total</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in orders %}
+            <tr>
+                <td>#{{ order.id }}</td>
+                <td>{{ order.created_at|date:"d M Y" }}</td>
+                <td>
+                    <ul class="order-items-list">
+                        {% for item in order.items.all %}
+                            <li>{{ item.quantity }}x {{ item.product.name }}</li>
+                        {% endfor %}
+                    </ul>
+                </td>
+                <td>₹{{ order.total_amount }}</td>
+                <td>
+                    <span class="status-badge status-{{ order.status|lower }}">
+                        {{ order.status }}
+                    </span>
+                </td>
+                <td>
+                    <a href="#" class="track-order-link">
+                        <i class="fas fa-search-location"></i> Track
+                    </a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" style="text-align: center; padding: 50px;">
+                    <i class="fas fa-box-open" style="font-size: 48px; color: #eee; margin-bottom: 15px; display: block;"></i>
+                    You have no orders yet. <a href="{% url 'product_list' %}" style="color: var(--primary-color); font-weight: 700;">Start shopping!</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

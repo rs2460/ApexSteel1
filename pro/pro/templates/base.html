@@ -1,0 +1,150 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>APEXSTEEL | Premium Jewellery</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Montserrat:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    {% block navbar %}
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <a href="/">APEXSTEEL</a>
+            </div>
+            <ul class="nav-links">
+                {% if user.is_superuser %}
+                    <li><a href="{% url 'admin_dashboard' %}"><i class="fas fa-user-shield"></i> Dashboard</a></li>
+                    <li><a href="{% url 'admin_analysis' %}"><i class="fas fa-chart-line"></i> Analysis</a></li>
+                    <li><a href="{% url 'admin_orders' %}"><i class="fas fa-box"></i> Orders</a></li>
+                    <li><a href="{% url 'add_product' %}"><i class="fas fa-plus"></i> Add Product</a></li>
+                {% else %}
+                    <li><a href="{% url 'index' %}"><i class="fas fa-home"></i> HOME</a></li>
+                    <li><a href="{% url 'product_list' %}"><i class="fas fa-briefcase"></i> PRODUCTS</a></li>
+                    <li><a href="{% url 'about' %}"><i class="fas fa-info-circle"></i> ABOUT</a></li>
+                    <li><a href="{% url 'contact' %}"><i class="fas fa-envelope"></i> CONTACT</a></li>
+                {% endif %}
+            </ul>
+            <div class="nav-icons">
+                {% if user.is_authenticated %}
+                    {% if user.is_superuser %}
+                       
+                        <a href="{% url 'logout' %}" class="logout-link"><i class="fas fa-sign-out-alt"></i> LOGOUT</a>
+                    {% else %}
+                       
+                        <a href="{% url 'cart' %}" class="cart-link">
+                            <i class="fas fa-shopping-cart"></i>
+                            <span id="cart-count" class="cart-badge">0</span>
+                        </a>
+                        <div class="profile-dropdown">
+                            <a href="#" class="profile-icon">
+                                <i class="far fa-user"></i>
+                            </a>
+                            <div class="dropdown-content">
+                                <a href="{% url 'my_account' %}"><i class="fas fa-history"></i> Order History</a>
+                                <a href="{% url 'my_account' %}"><i class="fas fa-truck"></i> Track Order</a>
+                                <a href="{% url 'wishlist' %}"><i class="fas fa-heart"></i> Wishlist</a>
+                                <hr>
+                                <a href="{% url 'logout' %}" class="logout-item"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                            </div>
+                        </div>
+                    {% endif %}
+                {% else %}
+                    <a href="{% url 'login' %}"><i class="far fa-user"></i> LOGIN</a>
+                    <a href="{% url 'register' %}"><i class="fas fa-user-plus"></i> REGISTER</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+    {% endblock %}
+
+    <main>
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    {% block footer %}
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-brand">
+                <h2 class="logo">APEXSTEEL</h2>
+                <p>Premium steel and stone accessories for the modern man. Quality craftsmanship meets contemporary design.</p>
+                <div class="newsletter">
+                    <input type="email" placeholder="Enter your email">
+                    <button><i class="fas fa-envelope"></i></button>
+                </div>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                </div>
+            </div>
+            <div class="footer-links">
+                <div class="link-column">
+                    <h3>MENU</h3>
+                    <ul>
+                        <li><a href="#">Jewellery</a></li>
+                        <li><a href="#">Accessories</a></li>
+                        <li><a href="#">Steel Collection</a></li>
+                        <li><a href="#">Stone Collection</a></li>
+                        <li><a href="#">New Arrivals</a></li>
+                    </ul>
+                </div>
+                <div class="link-column">
+                    <h3>REVIEWS</h3>
+                    <ul>
+                        <li><a href="#">Offers and Deals</a></li>
+                        <li><a href="#">Customer Reviews</a></li>
+                        <li><a href="#">Style Guide</a></li>
+                    </ul>
+                </div>
+                <div class="link-column">
+                    <h3>COMMUNITY</h3>
+                    <ul>
+                        <li><a href="#">Affiliate Program</a></li>
+                        <li><a href="#">Fashion Blog</a></li>
+                        <li><a href="#">Apex Spotlight</a></li>
+                    </ul>
+                </div>
+                <div class="link-column">
+                    <h3>QUICK LINKS</h3>
+                    <ul>
+                        <li><a href="#">About Us</a></li>
+                        <li><a href="#">Privacy Policy</a></li>
+                        <li><a href="#">Terms of Service</a></li>
+                        <li><a href="#">Track Order</a></li>
+                        <li><a href="#">FAQ's</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <div class="contact-info">
+                <h3>CONTACT US</h3>
+                <p>ApexSteel E-Commerce Private Limited</p>
+                <p>queries@apexsteel.co.in</p>
+                <p>Vasai Road, Mumbai - 401202</p>
+            </div>
+            <div class="copyright">
+                <p>&copy; 2026 APEXSTEEL. All Rights Reserved.</p>
+                <p>Designed for the Matrix World</p>
+            </div>
+        </div>
+    </footer>
+    {% endblock %}
+
+    <div id="toast-notification" class="toast-notification">
+        <i class="fas fa-check-circle"></i>
+        <span>Product added to cart!</span>
+    </div>
+
+    <script src="{% static 'js/main.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
